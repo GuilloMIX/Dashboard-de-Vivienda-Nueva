@@ -29,25 +29,30 @@ def obtener_ruta_base():
     """
     Detecta automáticamente si está corriendo en local o en Streamlit Cloud
     y retorna la ruta base apropiada para los archivos Excel
+    
+    GitHub Repo: https://github.com/GuilloMIX/Dashboard-de-Vivienda-Nueva
     """
-    # Ruta local (Windows)
+    # Ruta local (Windows) - Tu carpeta original
     ruta_local = r"C:\Users\Usuario\Desktop\Clases\6 semestre\Econometria II\Dashboard"
     
-    # Verificar si existe la ruta local
+    # Verificar si existe la ruta local (para desarrollo en VS Code)
     if os.path.exists(ruta_local):
-        print("✅ Usando ruta local")
+        print("✅ Ejecutando en LOCAL - Usando ruta de Windows")
         return ruta_local
     
-    # Si no existe, usar ruta relativa (para GitHub/Streamlit Cloud)
-    # Asume que los archivos Excel están en una carpeta 'data' en el repositorio
-    ruta_repositorio = os.path.join(os.path.dirname(__file__), "data")
+    # Si no existe, usar ruta relativa para GitHub/Streamlit Cloud
+    # Los archivos Excel deben estar en la carpeta 'Dashboard_github' del repositorio
+    ruta_repositorio = os.path.join(os.path.dirname(__file__), "Dashboard_github")
     
-    # Si la carpeta 'data' no existe, crearla (opcional)
+    # Si __file__ no funciona (algunos casos de Streamlit Cloud), usar ruta actual
     if not os.path.exists(ruta_repositorio):
-        # Intentar con la ruta actual del script
-        ruta_repositorio = os.path.join(os.getcwd(), "data")
+        ruta_repositorio = os.path.join(os.getcwd(), "Dashboard_github")
     
-    print(f"✅ Usando ruta del repositorio: {ruta_repositorio}")
+    # Si aún no existe, intentar con ruta directa desde la raíz
+    if not os.path.exists(ruta_repositorio):
+        ruta_repositorio = "Dashboard_github"
+    
+    print(f"✅ Ejecutando en CLOUD/GitHub - Usando ruta: {ruta_repositorio}")
     return ruta_repositorio
 
 # Usar la función para obtener la ruta base
@@ -57,13 +62,6 @@ RUTA_BASE = obtener_ruta_base()
 ARCHIVO_PRINCIPAL = "Datos vivienda filtrado.xlsx"
 ARCHIVO_DEPARTAMENTOS = "Indice Vivienda Departamentos.xlsx"
 ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
-
-# Mostrar información de debugging (opcional, puedes comentarlo después)
-st.sidebar.info(f"""
-**🔧 Info de Rutas:**
-- Ruta Base: `{RUTA_BASE}`
-- Existe: {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
-""")
 
 # ------------------------------------------------
 # 🎨 EMOJIS Y CONFIGURACIÓN DE SECCIONES
@@ -1445,3 +1443,4 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
