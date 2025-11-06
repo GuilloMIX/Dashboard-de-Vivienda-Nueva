@@ -64,6 +64,24 @@ ARCHIVO_DEPARTAMENTOS = "Indice Vivienda Departamentos.xlsx"
 ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
 
 # ------------------------------------------------
+# 🔍 INFORMACIÓN DE DEBUG (Mostrar en sidebar)
+# ------------------------------------------------
+# Descomentar las siguientes líneas durante desarrollo para verificar rutas
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🔧 Debug Info")
+st.sidebar.info(f"""
+**Ruta Base Detectada:**
+```
+{RUTA_BASE}
+```
+**¿Existe?** {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
+
+**Archivos esperados:**
+- {ARCHIVO_PRINCIPAL} {'✅' if os.path.exists(os.path.join(RUTA_BASE, ARCHIVO_PRINCIPAL)) else '❌'}
+- {ARCHIVO_DEPARTAMENTOS} {'✅' if os.path.exists(os.path.join(RUTA_BASE, ARCHIVO_DEPARTAMENTOS)) else '❌'}
+- {ARCHIVO_CIUDADES} {'✅' if os.path.exists(os.path.join(RUTA_BASE, ARCHIVO_CIUDADES)) else '❌'}
+ """)
+# ------------------------------------------------
 # 🎨 EMOJIS Y CONFIGURACIÓN DE SECCIONES
 # ------------------------------------------------
 secciones = {
@@ -1443,4 +1461,5 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
 
