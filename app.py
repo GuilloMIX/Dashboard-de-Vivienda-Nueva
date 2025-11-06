@@ -69,6 +69,48 @@ ARCHIVO_DEPARTAMENTOS = "Indice Vivienda Departamentos.xlsx"
 ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
 
 # ------------------------------------------------
+# 🔍 INFORMACIÓN DE DEBUG (Mostrar en sidebar)
+# ------------------------------------------------
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🔧 Debug Info")
+
+# Verificar archivos
+archivos_info = []
+for archivo in [ARCHIVO_PRINCIPAL, ARCHIVO_DEPARTAMENTOS, ARCHIVO_CIUDADES]:
+    ruta_completa = os.path.join(RUTA_BASE, archivo)
+    existe = os.path.exists(ruta_completa)
+    archivos_info.append(f"- {archivo} {'✅' if existe else '❌'}")
+
+# Listar todos los archivos en RUTA_BASE
+try:
+    archivos_en_directorio = os.listdir(RUTA_BASE) if os.path.exists(RUTA_BASE) else []
+    archivos_excel = [f for f in archivos_en_directorio if f.endswith('.xlsx')]
+except:
+    archivos_excel = []
+
+st.sidebar.info(f"""
+**Ruta Base Detectada:**
+```
+{RUTA_BASE}
+```
+**Ruta Absoluta:**
+```
+{os.path.abspath(RUTA_BASE)}
+```
+**¿Existe?** {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
+
+**Directorio de trabajo actual:**
+```
+{os.getcwd()}
+```
+
+**Archivos esperados:**
+{chr(10).join(archivos_info)}
+
+**Archivos Excel encontrados en la carpeta:**
+{chr(10).join([f'- {f}' for f in archivos_excel]) if archivos_excel else '(ninguno)'}
+""")
+# ------------------------------------------------
 # 🎨 EMOJIS Y CONFIGURACIÓN DE SECCIONES
 # ------------------------------------------------
 secciones = {
@@ -1448,7 +1490,3 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
-
-
-
-
