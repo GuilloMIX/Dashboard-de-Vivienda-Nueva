@@ -29,28 +29,45 @@ def obtener_ruta_base():
     """
     Detecta automáticamente si está corriendo en local o en Streamlit Cloud
     y retorna la ruta base apropiada para los archivos Excel
+    
+    GitHub Repo: https://github.com/GuilloMIX/Dashboard-de-Vivienda-Nueva
     """
-    # Ruta local (Windows)
+    # Ruta local (Windows) - Tu carpeta original
     ruta_local = r"C:\Users\Usuario\Desktop\Clases\6 semestre\Econometria II\Dashboard"
     
+    # Verificar si existe la ruta local (para desarrollo en VS Code)
     if os.path.exists(ruta_local):
         print("✅ Ejecutando en LOCAL - Usando ruta de Windows")
         return ruta_local
     
-    # Para Streamlit Cloud
-    # Primero intenta con la carpeta Dashboard_github
-    ruta_cloud_carpeta = "Dashboard_github"
-    if os.path.exists(ruta_cloud_carpeta):
-        # Verificar si hay archivos Excel ahí
-        archivos_excel = [f for f in os.listdir(ruta_cloud_carpeta) if f.endswith('.xlsx')]
-        if len(archivos_excel) > 0:
-            print(f"✅ Ejecutando en CLOUD - Usando carpeta: {ruta_cloud_carpeta}")
-            return ruta_cloud_carpeta
+    # IMPORTANTE: Probar múltiples ubicaciones para GitHub/Streamlit Cloud
+    posibles_rutas = [
+        "Dashboard_github",  # Carpeta en la raíz del repo
+        os.path.join(os.getcwd(), "Dashboard_github"),  # Desde el directorio actual
+        ".",  # Directorio actual (si los archivos están en la raíz)
+    ]
     
-    # Si no hay carpeta o está vacía, usar directorio actual
-    print("✅ Ejecutando en CLOUD - Usando directorio actual (.)")
-    return "."
-
+    # Buscar la primera ruta que contenga los archivos necesarios
+    archivos_requeridos = [
+        "Datos vivienda filtrado.xlsx",
+        "Indice Vivienda Departamentos.xlsx",
+        "Indice Vivienda Obras.xlsx"
+    ]
+    
+    for ruta in posibles_rutas:
+        if os.path.exists(ruta):
+            # Verificar si los archivos existen en esta ruta
+            archivos_encontrados = sum(1 for archivo in archivos_requeridos 
+                                      if os.path.exists(os.path.join(ruta, archivo)))
+            
+            if archivos_encontrados >= 2:  # Al menos 2 de 3 archivos
+                print(f"✅ Ejecutando en CLOUD/GitHub - Usando ruta: {ruta}")
+                print(f"   Archivos encontrados: {archivos_encontrados}/{len(archivos_requeridos)}")
+                return ruta
+    
+    # Si no se encontró ninguna ruta válida, usar Dashboard_github por defecto
+    print(f"⚠️ No se encontraron archivos en ninguna ubicación. Usando: Dashboard_github")
+    return "Dashboard_github"
 # Usar la función para obtener la ruta base
 RUTA_BASE = obtener_ruta_base()
 
@@ -1490,3 +1507,4 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
