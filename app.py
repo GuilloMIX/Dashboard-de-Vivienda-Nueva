@@ -251,17 +251,34 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # ------------------------------------------------
 # 📥 FUNCIONES DE CARGA SIMPLIFICADAS
 # ------------------------------------------------
 def verificar_archivo(nombre_archivo):
     """Verifica si un archivo existe en la ruta base"""
     ruta_completa = os.path.join(RUTA_BASE, nombre_archivo)
-    if not os.path.exists(ruta_completa):
+    ruta_abs = os.path.abspath(ruta_completa)
+    
+    # Debug: imprimir información
+    print(f"Verificando archivo: {nombre_archivo}")
+    print(f"Ruta relativa: {ruta_completa}")
+    print(f"Ruta absoluta: {ruta_abs}")
+    print(f"¿Existe?: {os.path.exists(ruta_abs)}")
+    
+    if not os.path.exists(ruta_abs):
         st.error(f"⚠️ No se encontró el archivo: **{nombre_archivo}**")
-        st.info(f"📂 Buscando en: `{ruta_completa}`")
+        st.info(f"📂 Buscando en: `{ruta_abs}`")
+        
+        # Listar archivos en el directorio para debug
+        try:
+            archivos_dir = os.listdir(RUTA_BASE)
+            st.warning(f"Archivos disponibles en {RUTA_BASE}: {archivos_dir}")
+        except Exception as e:
+            st.error(f"Error al listar directorio: {e}")
+        
         return None
-    return ruta_completa
+    return ruta_abs
 
 def listar_hojas_excel(ruta_archivo):
     """Lista todas las hojas disponibles en un archivo Excel"""
@@ -275,96 +292,26 @@ def listar_hojas_excel(ruta_archivo):
 @st.cache_data
 def cargar_datos_principal():
     """Carga el archivo principal de datos de vivienda"""
-    ruta = verificar_archivo(ARCHIVO_PRINCIPAL)
-    if ruta is None:
-        return None
-    
     try:
-        df = pd.read_excel(ruta)
+        ruta_completa = os.path.join(RUTA_BASE, ARCHIVO_PRINCIPAL)
+        ruta_abs = os.path.abspath(ruta_completa)
+        
+        print(f"Cargando archivo principal: {ruta_abs}")
+        
+        if not os.path.exists(ruta_abs):
+            st.error(f"⚠️ No se encontró el archivo: **{ARCHIVO_PRINCIPAL}**")
+            st.info(f"📂 Ruta intentada: `{ruta_abs}`")
+            return None
+        
+        df = pd.read_excel(ruta_abs)
         df["Periodo"] = df["Año"].astype(str) + "-" + df["Trimestre"].astype(str)
         st.success(f"✅ Archivo principal cargado: {ARCHIVO_PRINCIPAL}")
         return df
     except Exception as e:
         st.error(f"⚠️ Error al procesar {ARCHIVO_PRINCIPAL}: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
         return None
-
-@st.cache_data
-def cargar_excel_con_hoja(nombre_archivo, nombre_hoja):
-    """
-    Función genérica para cargar cualquier archivo Excel con una hoja específica
-    Maneja automáticamente nombres de hojas con caracteres especiales
-    
-    Args:
-        nombre_archivo: Nombre del archivo Excel
-        nombre_hoja: Nombre de la hoja a cargar
-    
-    Returns:
-        DataFrame o None si hay error
-    """
-    # Verificar que el archivo existe
-    ruta = verificar_archivo(nombre_archivo)
-    if ruta is None:
-        return None
-    
-    # Listar hojas disponibles
-    hojas_disponibles = listar_hojas_excel(ruta)
-    
-    if not hojas_disponibles:
-        st.error(f"⚠️ No se pudieron leer las hojas del archivo: {nombre_archivo}")
-        return None
-    
-    # Función para limpiar nombres de hojas (eliminar caracteres especiales invisibles)
-    def limpiar_nombre(nombre):
-        # Elimina espacios extras, tabulaciones, y caracteres especiales comunes
-        import re
-        nombre_limpio = re.sub(r'[\t\r\n\x00-\x1F\x7F-\x9F]', '', nombre)
-        return nombre_limpio.strip()
-    
-    # Buscar coincidencia exacta o por nombre limpio
-    hoja_encontrada = None
-    
-    # 1. Intentar coincidencia exacta
-    if nombre_hoja in hojas_disponibles:
-        hoja_encontrada = nombre_hoja
-    else:
-        # 2. Buscar por nombre limpio (sin caracteres especiales)
-        nombre_buscado_limpio = limpiar_nombre(nombre_hoja).lower()
-        
-        for hoja in hojas_disponibles:
-            hoja_limpia = limpiar_nombre(hoja).lower()
-            if hoja_limpia == nombre_buscado_limpio:
-                hoja_encontrada = hoja
-                break
-        
-        # 3. Si no se encuentra, buscar si el nombre está contenido
-        if hoja_encontrada is None:
-            for hoja in hojas_disponibles:
-                if nombre_hoja.lower() in hoja.lower() or hoja.lower().startswith(nombre_hoja.lower()):
-                    hoja_encontrada = hoja
-                    break
-    
-    # Si no se encontró ninguna coincidencia
-    if hoja_encontrada is None:
-        st.error(f"⚠️ Error: No se pudo encontrar una hoja compatible con **'{nombre_hoja}'** en **{nombre_archivo}**")
-        st.warning(f"📋 Hojas disponibles: {', '.join(hojas_disponibles)}")
-        st.info(f"💡 Verifica el nombre de la hoja en el archivo Excel.")
-        return None
-    
-    # Intentar cargar la hoja encontrada
-    try:
-        df = pd.read_excel(ruta, sheet_name=hoja_encontrada)
-        
-        # Mensaje diferente si se usó el nombre exacto o una variante
-        if hoja_encontrada == nombre_hoja:
-            st.success(f"✅ Datos cargados: {nombre_archivo} → Hoja '{nombre_hoja}' ({len(df)} filas)")
-        else:
-            st.success(f"✅ Datos cargados: {nombre_archivo} → Hoja '{hoja_encontrada}' (buscada como '{nombre_hoja}') ({len(df)} filas)")
-        
-        return df
-    except Exception as e:
-        st.error(f"⚠️ Error al leer la hoja '{hoja_encontrada}' de {nombre_archivo}: {str(e)}")
-        return None
-
 # ------------------------------------------------
 # 📥 INICIALIZAR SESSION STATE
 # ------------------------------------------------
@@ -1488,5 +1435,6 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
 
 
