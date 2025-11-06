@@ -77,7 +77,6 @@ ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
 # 🔍 INFORMACIÓN DE DEBUG
 # ------------------------------------------------
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔧 Debug Info")
 
 archivos_info = []
 for archivo in [ARCHIVO_PRINCIPAL, ARCHIVO_DEPARTAMENTOS, ARCHIVO_CIUDADES]:
@@ -1512,6 +1511,7 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
 
 
 
