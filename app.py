@@ -20,15 +20,50 @@ st.set_page_config(page_title="🏡 Vivienda Nueva en Colombia", layout="wide")
 st.title("🏡 Índice de precios de la Vivienda Nueva en Colombia con base en los datos del DANE")
 
 # ------------------------------------------------
-# 📂 CONFIGURACIÓN DE RUTAS CENTRALIZADAS
+# 📂 CONFIGURACIÓN DE RUTAS DINÁMICAS (Local + GitHub)
 # ------------------------------------------------
-# Directorio base donde están TODOS los archivos Excel
-RUTA_BASE = r"C:\Users\Usuario\Desktop\Clases\6 semestre\Econometria II\Dashboard"
+import os
+import sys
 
-# Nombres de los archivos
+def obtener_ruta_base():
+    """
+    Detecta automáticamente si está corriendo en local o en Streamlit Cloud
+    y retorna la ruta base apropiada para los archivos Excel
+    """
+    # Ruta local (Windows)
+    ruta_local = r"C:\Users\Usuario\Desktop\Clases\6 semestre\Econometria II\Dashboard"
+    
+    # Verificar si existe la ruta local
+    if os.path.exists(ruta_local):
+        print("✅ Usando ruta local")
+        return ruta_local
+    
+    # Si no existe, usar ruta relativa (para GitHub/Streamlit Cloud)
+    # Asume que los archivos Excel están en una carpeta 'data' en el repositorio
+    ruta_repositorio = os.path.join(os.path.dirname(__file__), "data")
+    
+    # Si la carpeta 'data' no existe, crearla (opcional)
+    if not os.path.exists(ruta_repositorio):
+        # Intentar con la ruta actual del script
+        ruta_repositorio = os.path.join(os.getcwd(), "data")
+    
+    print(f"✅ Usando ruta del repositorio: {ruta_repositorio}")
+    return ruta_repositorio
+
+# Usar la función para obtener la ruta base
+RUTA_BASE = obtener_ruta_base()
+
+# Nombres de los archivos (sin cambios)
 ARCHIVO_PRINCIPAL = "Datos vivienda filtrado.xlsx"
 ARCHIVO_DEPARTAMENTOS = "Indice Vivienda Departamentos.xlsx"
 ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
+
+# Mostrar información de debugging (opcional, puedes comentarlo después)
+st.sidebar.info(f"""
+**🔧 Info de Rutas:**
+- Ruta Base: `{RUTA_BASE}`
+- Existe: {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
+""")
 
 # ------------------------------------------------
 # 🎨 EMOJIS Y CONFIGURACIÓN DE SECCIONES
@@ -325,7 +360,6 @@ with st.sidebar:
     st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
     st.markdown("---")
     st.caption("💡 Haz clic en los iconos para navegar")
-    st.caption(f"📂 Directorio: `{RUTA_BASE}`")
 
 # ------------------------------------------------
 # 📊 CONTENIDO PRINCIPAL SEGÚN LA VISTA
