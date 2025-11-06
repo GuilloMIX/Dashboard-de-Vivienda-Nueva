@@ -20,17 +20,13 @@ st.set_page_config(page_title="🏡 Vivienda Nueva en Colombia", layout="wide")
 st.title("🏡 Índice de precios de la Vivienda Nueva en Colombia con base en los datos del DANE")
 
 # ------------------------------------------------
-# 📂 CONFIGURACIÓN DE RUTAS DINÁMICAS (Local + GitHub)
+# 📂 CONFIGURACIÓN DE RUTAS DINÁMICAS (Local + GitHub) - VERSIÓN CORREGIDA
 # ------------------------------------------------
-import os
-import sys
 
 def obtener_ruta_base():
     """
     Detecta automáticamente si está corriendo en local o en Streamlit Cloud
     y retorna la ruta base apropiada para los archivos Excel
-    
-    GitHub Repo: https://github.com/GuilloMIX/Dashboard-de-Vivienda-Nueva
     """
     # Ruta local (Windows) - Tu carpeta original
     ruta_local = r"C:\Users\Usuario\Desktop\Clases\6 semestre\Econometria II\Dashboard"
@@ -40,14 +36,14 @@ def obtener_ruta_base():
         print("✅ Ejecutando en LOCAL - Usando ruta de Windows")
         return ruta_local
     
-    # IMPORTANTE: Probar múltiples ubicaciones para GitHub/Streamlit Cloud
+    # Para Streamlit Cloud: Probar múltiples ubicaciones
     posibles_rutas = [
-        "Dashboard_github",  # Carpeta en la raíz del repo
-        os.path.join(os.getcwd(), "Dashboard_github"),  # Desde el directorio actual
-        ".",  # Directorio actual (si los archivos están en la raíz)
+        "Dashboard_github",
+        os.path.join(os.getcwd(), "Dashboard_github"),
+        ".",
     ]
     
-    # Buscar la primera ruta que contenga los archivos necesarios
+    # Archivos que buscamos
     archivos_requeridos = [
         "Datos vivienda filtrado.xlsx",
         "Indice Vivienda Departamentos.xlsx",
@@ -60,45 +56,35 @@ def obtener_ruta_base():
             archivos_encontrados = sum(1 for archivo in archivos_requeridos 
                                       if os.path.exists(os.path.join(ruta, archivo)))
             
-            if archivos_encontrados >= 2:  # Al menos 2 de 3 archivos
-                print(f"✅ Ejecutando en CLOUD/GitHub - Usando ruta: {ruta}")
+            if archivos_encontrados >= 2:
+                print(f"✅ Ejecutando en CLOUD - Usando ruta: {ruta}")
                 print(f"   Archivos encontrados: {archivos_encontrados}/{len(archivos_requeridos)}")
                 return ruta
     
-    # Si no se encontró ninguna ruta válida, usar Dashboard_github por defecto
-    print(f"⚠️ No se encontraron archivos en ninguna ubicación. Usando: Dashboard_github")
+    # Por defecto, usar Dashboard_github
+    print(f"⚠️ Usando ruta por defecto: Dashboard_github")
     return "Dashboard_github"
-# Usar la función para obtener la ruta base
+
+# Obtener la ruta base UNA SOLA VEZ
 RUTA_BASE = obtener_ruta_base()
 
-# Agregar información de debug a la consola
-print(f"\n{'='*60}")
-print(f"DEBUG: RUTA_BASE = {RUTA_BASE}")
-print(f"DEBUG: os.getcwd() = {os.getcwd()}")
-print(f"DEBUG: __file__ existe = {('__file__' in dir())}")
-if '__file__' in dir():
-    print(f"DEBUG: __file__ = {__file__}")
-print(f"{'='*60}\n")
-
-# Nombres de los archivos (sin cambios)
+# Nombres de los archivos
 ARCHIVO_PRINCIPAL = "Datos vivienda filtrado.xlsx"
 ARCHIVO_DEPARTAMENTOS = "Indice Vivienda Departamentos.xlsx"
 ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
 
 # ------------------------------------------------
-# 🔍 INFORMACIÓN DE DEBUG (Mostrar en sidebar)
+# 🔍 INFORMACIÓN DE DEBUG
 # ------------------------------------------------
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🔧 Debug Info")
 
-# Verificar archivos
 archivos_info = []
 for archivo in [ARCHIVO_PRINCIPAL, ARCHIVO_DEPARTAMENTOS, ARCHIVO_CIUDADES]:
     ruta_completa = os.path.join(RUTA_BASE, archivo)
     existe = os.path.exists(ruta_completa)
     archivos_info.append(f"- {archivo} {'✅' if existe else '❌'}")
 
-# Listar todos los archivos en RUTA_BASE
 try:
     archivos_en_directorio = os.listdir(RUTA_BASE) if os.path.exists(RUTA_BASE) else []
     archivos_excel = [f for f in archivos_en_directorio if f.endswith('.xlsx')]
@@ -116,15 +102,10 @@ st.sidebar.info(f"""
 ```
 **¿Existe?** {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
 
-**Directorio de trabajo actual:**
-```
-{os.getcwd()}
-```
-
 **Archivos esperados:**
 {chr(10).join(archivos_info)}
 
-**Archivos Excel encontrados en la carpeta:**
+**Archivos Excel en carpeta:**
 {chr(10).join([f'- {f}' for f in archivos_excel]) if archivos_excel else '(ninguno)'}
 """)
 # ------------------------------------------------
@@ -1507,4 +1488,5 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
 
