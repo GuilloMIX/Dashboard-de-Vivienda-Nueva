@@ -40,23 +40,50 @@ def obtener_ruta_base():
         print("✅ Ejecutando en LOCAL - Usando ruta de Windows")
         return ruta_local
     
-    # Si no existe, usar ruta relativa para GitHub/Streamlit Cloud
-    # Los archivos Excel deben estar en la carpeta 'Dashboard_github' del repositorio
-    ruta_repositorio = os.path.join(os.path.dirname(__file__), "Dashboard_github")
+    # Para Streamlit Cloud, usar directorio actual
+    return "."
     
-    # Si __file__ no funciona (algunos casos de Streamlit Cloud), usar ruta actual
-    if not os.path.exists(ruta_repositorio):
-        ruta_repositorio = os.path.join(os.getcwd(), "Dashboard_github")
+    # IMPORTANTE: Probar múltiples ubicaciones para GitHub/Streamlit Cloud
+    posibles_rutas = [
+        "Dashboard_github",  # Carpeta en la raíz del repo
+        os.path.join(os.getcwd(), "Dashboard_github"),  # Desde el directorio actual
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "Dashboard_github"),  # Relativo al script
+        ".",  # Directorio actual (si los archivos están en la raíz)
+    ]
     
-    # Si aún no existe, intentar con ruta directa desde la raíz
-    if not os.path.exists(ruta_repositorio):
-        ruta_repositorio = "Dashboard_github"
+    # Buscar la primera ruta que contenga los archivos necesarios
+    archivos_requeridos = [
+        "Datos vivienda filtrado.xlsx",
+        "Indice Vivienda Departamentos.xlsx",
+        "Indice Vivienda Obras.xlsx"
+    ]
     
-    print(f"✅ Ejecutando en CLOUD/GitHub - Usando ruta: {ruta_repositorio}")
-    return ruta_repositorio
+    for ruta in posibles_rutas:
+        if os.path.exists(ruta):
+            # Verificar si los archivos existen en esta ruta
+            archivos_encontrados = sum(1 for archivo in archivos_requeridos 
+                                      if os.path.exists(os.path.join(ruta, archivo)))
+            
+            if archivos_encontrados > 0:
+                print(f"✅ Ejecutando en CLOUD/GitHub - Usando ruta: {ruta}")
+                print(f"   Archivos encontrados: {archivos_encontrados}/{len(archivos_requeridos)}")
+                return ruta
+    
+    # Si no se encontró ninguna ruta válida, usar la primera por defecto
+    print(f"⚠️ No se encontraron archivos en ninguna ubicación. Usando: Dashboard_github")
+    return "Dashboard_github"
 
 # Usar la función para obtener la ruta base
 RUTA_BASE = obtener_ruta_base()
+
+# Agregar información de debug a la consola
+print(f"\n{'='*60}")
+print(f"DEBUG: RUTA_BASE = {RUTA_BASE}")
+print(f"DEBUG: os.getcwd() = {os.getcwd()}")
+print(f"DEBUG: __file__ existe = {('__file__' in dir())}")
+if '__file__' in dir():
+    print(f"DEBUG: __file__ = {__file__}")
+print(f"{'='*60}\n")
 
 # Nombres de los archivos (sin cambios)
 ARCHIVO_PRINCIPAL = "Datos vivienda filtrado.xlsx"
@@ -66,21 +93,45 @@ ARCHIVO_CIUDADES = "Indice Vivienda Obras.xlsx"
 # ------------------------------------------------
 # 🔍 INFORMACIÓN DE DEBUG (Mostrar en sidebar)
 # ------------------------------------------------
-# Descomentar las siguientes líneas durante desarrollo para verificar rutas
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🔧 Debug Info")
+
+# Verificar archivos
+archivos_info = []
+for archivo in [ARCHIVO_PRINCIPAL, ARCHIVO_DEPARTAMENTOS, ARCHIVO_CIUDADES]:
+    ruta_completa = os.path.join(RUTA_BASE, archivo)
+    existe = os.path.exists(ruta_completa)
+    archivos_info.append(f"- {archivo} {'✅' if existe else '❌'}")
+
+# Listar todos los archivos en RUTA_BASE
+try:
+    archivos_en_directorio = os.listdir(RUTA_BASE) if os.path.exists(RUTA_BASE) else []
+    archivos_excel = [f for f in archivos_en_directorio if f.endswith('.xlsx')]
+except:
+    archivos_excel = []
+
 st.sidebar.info(f"""
 **Ruta Base Detectada:**
 ```
 {RUTA_BASE}
 ```
+**Ruta Absoluta:**
+```
+{os.path.abspath(RUTA_BASE)}
+```
 **¿Existe?** {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
 
+**Directorio de trabajo actual:**
+```
+{os.getcwd()}
+```
+
 **Archivos esperados:**
-- {ARCHIVO_PRINCIPAL} {'✅' if os.path.exists(os.path.join(RUTA_BASE, ARCHIVO_PRINCIPAL)) else '❌'}
-- {ARCHIVO_DEPARTAMENTOS} {'✅' if os.path.exists(os.path.join(RUTA_BASE, ARCHIVO_DEPARTAMENTOS)) else '❌'}
-- {ARCHIVO_CIUDADES} {'✅' if os.path.exists(os.path.join(RUTA_BASE, ARCHIVO_CIUDADES)) else '❌'}
- """)
+{chr(10).join(archivos_info)}
+
+**Archivos Excel encontrados en la carpeta:**
+{chr(10).join([f'- {f}' for f in archivos_excel]) if archivos_excel else '(ninguno)'}
+""")
 # ------------------------------------------------
 # 🎨 EMOJIS Y CONFIGURACIÓN DE SECCIONES
 # ------------------------------------------------
@@ -1461,5 +1512,6 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
 
 
