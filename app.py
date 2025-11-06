@@ -91,23 +91,6 @@ try:
 except:
     archivos_excel = []
 
-st.sidebar.info(f"""
-**Ruta Base Detectada:**
-```
-{RUTA_BASE}
-```
-**Ruta Absoluta:**
-```
-{os.path.abspath(RUTA_BASE)}
-```
-**¿Existe?** {'✅ Sí' if os.path.exists(RUTA_BASE) else '❌ No'}
-
-**Archivos esperados:**
-{chr(10).join(archivos_info)}
-
-**Archivos Excel en carpeta:**
-{chr(10).join([f'- {f}' for f in archivos_excel]) if archivos_excel else '(ninguno)'}
-""")
 # ------------------------------------------------
 # 🎨 EMOJIS Y CONFIGURACIÓN DE SECCIONES
 # ------------------------------------------------
@@ -1529,7 +1512,6 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
-
 
 
 
