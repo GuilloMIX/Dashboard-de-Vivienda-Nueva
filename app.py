@@ -99,7 +99,7 @@ secciones = {
         "color": "#00c4ff",
         "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
     },
-    "Apartamento": {
+    "Departamentos": {
         "emoji": "🏙️​",
         "color": "#ff6b6b",
         "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
@@ -1512,6 +1512,7 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
+
 
 
 
