@@ -452,7 +452,7 @@ if st.session_state.vista_actual == "Casas":
     elif df_ciudades_casas is None:
         st.warning("⚠️ No se pudieron cargar los datos de ciudades, pero sí los de departamentos.")
     
-    # GRÁFICA DE EVOLUCIÓN TEMPORAL (similar a Total y Modelo)
+    # GRÁFICA DE EVOLUCIÓN TEMPORAL
     if df_principal is not None and 'Casas' in df_principal.columns:
         st.markdown("---")
         
@@ -504,7 +504,7 @@ if st.session_state.vista_actual == "Casas":
             st.metric("Máximo Histórico", f"{df_principal['Casas'].max():.2f}")
         with col4:
             st.metric("Mínimo Histórico", f"{df_principal['Casas'].min():.2f}")
-        
+    
         st.markdown("---")
     
     if df_dept_casas is not None or df_ciudades_casas is not None:
@@ -513,7 +513,7 @@ if st.session_state.vista_actual == "Casas":
         tab1, tab2, tab3 = st.tabs(["📊 Resumen General", "🌆​Indice en ciudades", "🏗️ Obras en Construcción"])
 
         with tab1:
-            st.write("### Estadísticas Generales de Casas")
+            st.write("### Estadísticas Generales de Casas en 2025 por Ciudades")
             
             if df_dept_casas is not None:
                 # Calcular última columna disponible (último periodo)
@@ -539,10 +539,12 @@ if st.session_state.vista_actual == "Casas":
                         st.metric("Desviación Estándar", f"{desv_std:.2f}")
                     
                     # Tabla de departamentos
-                    st.write("### Top 10 Departamentos - Índice de Precios de Casas")
+                    st.write("### Top 10 Ciudades - Índice de Precios de Casas")
                     df_top = df_dept_casas.nlargest(10, ultima_col)[[df_dept_casas.columns[0], ultima_col]].reset_index(drop=True)
                     df_top.columns = ['Departamento', 'Índice']
                     st.dataframe(df_top.style.format({'Índice': '{:.2f}'}).hide(axis="index"), use_container_width=True)
+                    
+                    # Tabla de Obras
             else:
                 st.info("No hay datos de departamentos disponibles para mostrar estadísticas.")
         
@@ -668,13 +670,13 @@ if st.session_state.vista_actual == "Casas":
                     st.plotly_chart(fig_pie_ciudad, use_container_width=True)
 
                     # Top ciudades (tabla)
-                    st.write("### Top 15 Ciudades - Cantidad de Casas en Construcción")
-                    df_top_ciudad = df_mapa_ciudad.nlargest(15, 'Indice').reset_index(drop=True)
+                    st.write("### Top 10 Ciudades - Cantidad de Casas en Construcción")
+                    df_top_ciudad = df_mapa_ciudad.nlargest(10, 'Indice').reset_index(drop=True)
                     col1, col2 = st.columns(2)
                     with col1:
                         st.dataframe(df_top_ciudad.head(8).style.format({'Indice': '{:.2f}'}).hide(axis="index"), use_container_width=True)
                     with col2:
-                        st.dataframe(df_top_ciudad.tail(7).style.format({'Indice': '{:.2f}'}).hide(axis="index"), use_container_width=True)
+                        st.dataframe(df_top_ciudad.tail(3).style.format({'Indice': '{:.2f}'}).hide(axis="index"), use_container_width=True)
             else:
                 st.warning("⚠️ No hay datos de ciudades disponibles para el mapa de calor.")
 
@@ -759,7 +761,7 @@ elif st.session_state.vista_actual == "Departamento":
         tab1, tab2, tab3 = st.tabs(["📊 Resumen General", "🌆​ Índice en ciudades", "🏗️ Obras en Construcción"])
         
         with tab1:
-            st.write("### Estadísticas Generales de Apartamentos")
+            st.write("### Estadísticas Generales de Apartamentos en 2025 por Ciudades")
             
             if df_dept_aptos is not None:
                 # Calcular última columna disponible (último periodo)
@@ -785,7 +787,7 @@ elif st.session_state.vista_actual == "Departamento":
                         st.metric("Desviación Estándar", f"{desv_std:.2f}")
                     
                     # Tabla de departamentos
-                    st.write("### Top 10 Departamentos - Índice de Precios de Apartamentos")
+                    st.write("### Top 10 Ciudad - Índice de Precios de Apartamentos")
                     df_top = df_dept_aptos.nlargest(10, ultima_col)[[df_dept_aptos.columns[0], ultima_col]].reset_index(drop=True)
                     df_top.columns = ['Departamento', 'Índice']
                     st.dataframe(df_top.style.format({'Índice': '{:.2f}'}).hide(axis="index"), use_container_width=True)
@@ -1511,7 +1513,6 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
-
 
 
 
