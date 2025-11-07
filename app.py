@@ -544,7 +544,6 @@ if st.session_state.vista_actual == "Casas":
                     df_top.columns = ['Departamento', 'Índice']
                     st.dataframe(df_top.style.format({'Índice': '{:.2f}'}).hide(axis="index"), use_container_width=True)
                     
-                    # Tabla de Obras
             else:
                 st.info("No hay datos de departamentos disponibles para mostrar estadísticas.")
         
@@ -1513,7 +1512,6 @@ elif st.session_state.vista_actual == "Total y Modelo":
 
 else:
     st.info("👈 Selecciona una opción en el panel izquierdo para comenzar.")
-
 
 
 
